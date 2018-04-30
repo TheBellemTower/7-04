@@ -21,10 +21,14 @@ physics.addBody( theGround, "static", {
     bounce = 0.3 
     } )
 
+local fight = display.newText( "Fight", 1000, 200, native.systemFont, 350)
+fight.alpha = .5
+fight:setTextColor( .7, 0, 0)
+
 local Ground = display.newImage( "./assets/sprites/land.png" )
 Ground.x = display.contentCenterX + 900
-Ground.y = 1000
-Ground.id = "the ground"
+Ground.y = display.contentHeight
+Ground.id = "the Ground"
 physics.addBody( Ground, "static", { 
     friction = 0.5, 
     bounce = 0.3 
@@ -34,7 +38,8 @@ local rightWall = display.newRect( 2048, display.contentHeight / 2, 1, display.c
 --myRectangle.strokeWidth = 3
 --myRectangle:setFillColor( 0.5 )
 --myRectangle:setStrokeColor( 1, 0, 0 )
---rightWall.alpha = 0.0
+rightWall.alpha = 0.0
+rightWall.id = "wall"
 physics.addBody( rightWall, "static", { 
     friction = 0.5, 
     bounce = 0.3 
@@ -46,10 +51,21 @@ theCharacter.y = 900
 theCharacter.id = "the character"
 physics.addBody( theCharacter, "dynamic", { 
     density = 3.0, 
-    friction = 0.5, 
-    bounce = .7
+    friction = 0.3, 
+    bounce = .3
     } )
 theCharacter.isFixedRotation = true
+
+local theCharacter2 = display.newImage( "./assets/sprites/ninjaG.png" )
+theCharacter2.x = display.contentCenterX 
+theCharacter2.y = 900
+theCharacter2.id = "the character"
+physics.addBody( theCharacter2, "dynamic", { 
+    density = 3.0, 
+    friction = 0.3, 
+    bounce = .3
+    } )
+theCharacter2.isFixedRotation = true
 
 local dPad = display.newImage( "./assets/sprites/d-pad.png" )
 dPad.x = 150
@@ -83,6 +99,17 @@ jump.y = display.contentHeight - 80
 jump.id = "jump button"
 jump.alpha = 0.5
  
+local function characterCollision( self, event )
+ 
+    if ( event.phase == "began" ) then
+        print( self.id .. ": collision began with " .. event.other.id )
+ 
+    elseif ( event.phase == "ended" ) then
+        print( self.id .. ": collision ended with " .. event.other.id )
+    end
+end
+
+
 function up:touch( event )
     if ( event.phase == "ended" ) then
         -- move the character up
@@ -154,9 +181,20 @@ function checkCharacterPosition( event )
     end
 end
 
+function checkCharacter2Position( event )
+    -- check every frame to see if character has fallen
+    if theCharacter2.y > display.contentHeight + 500 then
+        theCharacter2.x = display.contentCenterX 
+        theCharacter2.y = 900
+    end
+end 
+
 up:addEventListener( "touch", up )
 down:addEventListener( "touch", down )
 left:addEventListener( "touch", left )
 right:addEventListener( "touch", right )
 jump:addEventListener( "touch", jumpButton )
 Runtime:addEventListener( "enterFrame", checkCharacterPosition )
+Runtime:addEventListener( "enterFrame", checkCharacter2Position )
+theCharacter.collision = characterCollision
+theCharacter:addEventListener( "collision" )
